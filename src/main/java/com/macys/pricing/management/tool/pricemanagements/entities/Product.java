@@ -22,6 +22,20 @@ public class Product {
 	private Integer location;
 	private String analyticsInfo;
 	private String merchantDecision;
+	
+	public Product(Integer id,Integer itemNum,String itemName,BigDecimal itemPrice,Integer location,String analyticsInfo, String merchantDecision,Integer version)
+	{
+		this.itemNum=itemNum;
+		this.itemName=itemName;
+		this.itemPrice=itemPrice;
+		this.location=location;
+		this.analyticsInfo=analyticsInfo;
+		this.merchantDecision=merchantDecision;
+	}
+
+	public Product() {
+		// TODO Auto-generated constructor stub
+	}
 
 	@Version
 	private Integer version;

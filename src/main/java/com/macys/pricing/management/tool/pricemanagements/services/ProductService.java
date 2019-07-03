@@ -1,5 +1,7 @@
 package com.macys.pricing.management.tool.pricemanagements.services;
 
+import java.util.Optional;
+
 import com.macys.pricing.management.tool.pricemanagements.entities.Product;
 
 public interface ProductService {
@@ -10,7 +12,7 @@ public interface ProductService {
 
     Product saveProduct(Product product);
 
-    void deleteProduct(Integer id);
+    boolean deleteProduct(Integer id);
 
 	Product updateProduct(Product product);
 

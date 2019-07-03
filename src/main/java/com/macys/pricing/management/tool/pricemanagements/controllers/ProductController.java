@@ -1,10 +1,11 @@
 package com.macys.pricing.management.tool.pricemanagements.controllers;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import org.apache.log4j.Logger;
-import org.apache.log4j.spi.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
@@ -45,8 +46,9 @@ public class ProductController {
     @CrossOrigin
     @RequestMapping(value = "/{location}/", method = RequestMethod.GET)
     public ResponseEntity<List<Product>> list(Model model) {
+    	ResponseEntity<List<Product>> responseEntity = null;
     	List<Product> productItems = (List<Product>) productService.listAllProducts();
-    	ResponseEntity<List<Product>> responseEntity = new ResponseEntity<List<Product>>(productItems, HttpStatus.OK);
+    	responseEntity = productItems.isEmpty()?new ResponseEntity<List<Product>>(productItems, HttpStatus.NO_CONTENT):new ResponseEntity<List<Product>>(productItems, HttpStatus.OK);
     	logger.info("Fetched all the products from H2 DB successful");
         return responseEntity;
     }
@@ -61,9 +63,21 @@ public class ProductController {
     @CrossOrigin
     @RequestMapping("/{location}/fetch/{id}")
     public ResponseEntity<Product> showProduct(@PathVariable Integer id, Model model) {
-    	Product product = productService.getProductById(id);
-    	ResponseEntity<Product> response = new ResponseEntity<Product>(product, HttpStatus.OK);
-    	logger.info("Fetching the item for item number " + product.getId());
+    	ResponseEntity<Product> response =null;
+    	Product product = null;
+    	try
+    	{
+    		product = productService.getProductById(id);
+    		response = new ResponseEntity<Product>(product, HttpStatus.OK);
+    		logger.info("Fetching the item for item number " + product.getId());
+    	}
+    	catch(NoSuchElementException noSuchElement)
+    	{
+    		response = new ResponseEntity<Product>(new Product(), HttpStatus.NO_CONTENT);
+    		logger.info("No item Found for item number " + id);
+    	}
+    	
+    	
         return response;
     }
 
@@ -77,6 +91,7 @@ public class ProductController {
     @CrossOrigin
     @RequestMapping(value = "/{location}/save", method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
     public ResponseEntity<String> saveProduct(@RequestBody Product product) {
+    	System.out.println("Hi");
         productService.saveProduct(product);
         logger.info("Saved the item details for the ID " + product.getId());
         return new ResponseEntity<String>(HttpStatus.CREATED);
@@ -85,9 +100,18 @@ public class ProductController {
     @CrossOrigin
     @RequestMapping(value = "/{location}/update", method = RequestMethod.PUT, consumes = "application/json", produces = "application/json")
     public ResponseEntity<String> updateProduct(@RequestBody Product product) {
-        productService.updateProduct(product);
-        logger.info("Saved the item details for the ID " + product.getId());
-        return new ResponseEntity<String>(HttpStatus.CREATED);
+    	ResponseEntity<String> responseEntity = null;
+    	try
+    	{    		
+	        productService.updateProduct(product);
+	        logger.info("Saved the item details for the ID " + product.getId());
+	        responseEntity = new ResponseEntity<String>(HttpStatus.CREATED);
+    	}
+    	catch(EmptyResultDataAccessException emptyResultException)
+    	{
+    		responseEntity = new ResponseEntity<String>(HttpStatus.NOT_MODIFIED);
+    	}
+    	return responseEntity;
     }
     /**
      * Delete product by its id.
@@ -98,9 +122,22 @@ public class ProductController {
     @CrossOrigin
     @RequestMapping("/{location}/delete/{id}")
     public ResponseEntity<String> delete(@PathVariable Integer id) {
+    	ResponseEntity<String> responseEntity = null;
+    	try
+    	{
         productService.deleteProduct(id);
+        responseEntity = new ResponseEntity<String>(HttpStatus.OK);
         logger.info("Deleted item details for the ID " + id);
-        return new ResponseEntity<String>(HttpStatus.OK);
+    	}
+    	catch(IllegalArgumentException illegalArgumentException)
+    	{
+    		responseEntity = new ResponseEntity<String>(HttpStatus.BAD_REQUEST);
+    	}
+    	catch(EmptyResultDataAccessException emptyDataResult)
+    	{
+    		responseEntity = new ResponseEntity<String>(HttpStatus.NO_CONTENT);
+    	}
+        return responseEntity;
     }
 
 }
