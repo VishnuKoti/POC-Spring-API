@@ -16,6 +16,7 @@ node('master') {
              git url: 'https://github.com/VishnuKoti/POC-Spring-API.git'
         
 	        def mvnHome = tool 'M3'
+	        sh "${mvnHome}/bin/mvn update"
 		sh "${mvnHome}/bin/mvn clean install"
 		dockerCmd 'build --tag upmt/spring:SNAPSHOT1.0 .'
         
