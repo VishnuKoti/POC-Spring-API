@@ -17,6 +17,13 @@ node('master') {
 		dockerCmd 'build --tag upmt/spring:SNAPSHOT1.0 .'
         
     }
+    
+       stage('Test') {
+                
+    	        def mvnHome = tool 'M3'
+    		sh "${mvnHome}/bin/mvn test"
+            
+    }
  
     stage('Deploy') {
           
