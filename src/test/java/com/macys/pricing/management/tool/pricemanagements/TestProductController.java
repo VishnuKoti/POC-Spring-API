@@ -103,8 +103,12 @@ public class TestProductController {
 	@Test
 	public void test_fetchProduct() throws Exception {
 		Mockito.when(productService.getProductById(1)).thenReturn(setUpProductDetail(1));
+		//Pass test condition
 		mvc.perform(get("/items/{location}/fetch/{id}", 2, 1).accept(MediaType.APPLICATION_JSON)).andDo(print())
-				.andExpect(status().is5xxServerError()).andExpect(MockMvcResultMatchers.jsonPath("$.[*]").exists());
+				.andExpect(status().isOk()).andExpect(MockMvcResultMatchers.jsonPath("$.[*]").exists());
+		//Fail test condition
+		//mvc.perform(get("/items/{location}/fetch/{id}", 2, 1).accept(MediaType.APPLICATION_JSON)).andDo(print())
+				//.andExpect(status().is5xxServerError()).andExpect(MockMvcResultMatchers.jsonPath("$.[*]").exists());
 		System.out.println("Status---->" + content().toString());
 	}
 
